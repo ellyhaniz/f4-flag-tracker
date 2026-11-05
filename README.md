@@ -85,6 +85,10 @@ Stacks the per-series CSVs into `out/comparison.csv` and prints the season summa
 ### 4. Dashboard (`scripts/build_dashboard.py`)
 
 Embeds the CSV rows as JSON into one self-contained HTML file — no internet or libraries needed.
+The page opens with a **"What neutralised means"** section: definitions, a table of what does and
+doesn't count (Safety Car / FCY / red flag = yes; local waved yellow, lap 1, single-car incidents =
+no), and a lap-time chart where you pick any race and see each lap against the 1.25× and 3× lines.
+The thresholds shown there are read from `analyse_laps.py`, so changing them updates the page too.
 Change the highlighted series with `--highlight "British F4"`.
 
 ## Known gaps / caveats

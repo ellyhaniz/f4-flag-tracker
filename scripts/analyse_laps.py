@@ -151,6 +151,8 @@ def main():
             "red_flag_minutes": round(red_flag_minutes(pace, base), 1),
             "median_green_lap_s": round(base, 3),
             "neutralised_lap_numbers": spans(neut),
+            # lead pace (median of top-3) for every lap, ";"-separated seconds, for the dashboard chart
+            "lead_pace_s": ";".join(f"{pace[n]:.1f}" for n in sorted(pace)),
             "source": str(f),
         })
     out = pathlib.Path(a.out)
