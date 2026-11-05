@@ -1,0 +1,31 @@
+series,event,race,date,cars,total_laps,neutralised_laps,green_laps,neutralised_pct,neutralised_time_pct,red_flag_minutes,median_green_lap_s,neutralised_lap_numbers,source
+British F4,Weekend 01 - Donington Park,Round 1,,21,15,6,9,40.0,49.9,0.0,66.377,6-7;9-12,data\british\2025\Weekend_01_Donington_Park\RACE_01\laps.json
+British F4,Weekend 01 - Donington Park,Round 2,,20,13,3,10,23.1,30.5,0.0,65.958,4-6,data\british\2025\Weekend_01_Donington_Park\RACE_02\laps.json
+British F4,Weekend 01 - Donington Park,Round 3,,21,18,1,17,5.6,8.2,0.0,66.323,7,data\british\2025\Weekend_01_Donington_Park\RACE_03\laps.json
+British F4,Weekend 02 - Silverstone GP,Round 4,,20,9,2,7,22.2,31.1,0.0,122.446,2;7,data\british\2025\Weekend_02_Silverstone_GP\RACE_04\laps.json
+British F4,Weekend 02 - Silverstone GP,Round 5,,21,9,1,8,11.1,17.9,0.0,122.403,8,data\british\2025\Weekend_02_Silverstone_GP\RACE_05\laps.json
+British F4,Weekend 02 - Silverstone GP,Round 6,,20,11,2,9,18.2,26.9,0.0,122.609,6-7,data\british\2025\Weekend_02_Silverstone_GP\RACE_06\laps.json
+British F4,Weekend 03 - Snetterton,Round 7,,23,11,0,11,0.0,0.0,0.0,110.573,,data\british\2025\Weekend_03_Snetterton\RACE_07\laps.json
+British F4,Weekend 03 - Snetterton,Round 8,,23,11,0,11,0.0,0.0,0.0,110.341,,data\british\2025\Weekend_03_Snetterton\RACE_08\laps.json
+British F4,Weekend 03 - Snetterton,Round 9,,22,14,0,14,0.0,0.0,0.0,109.829,,data\british\2025\Weekend_03_Snetterton\RACE_09\laps.json
+British F4,Weekend 04 - Thruxton,Round 10,,18,5,4,1,80.0,85.9,0.0,76.102,1;3-5,data\british\2025\Weekend_04_Thruxton\RACE_10\laps.json
+British F4,Weekend 04 - Thruxton,Round 11,,24,15,1,14,6.7,10.2,0.0,79.522,1,data\british\2025\Weekend_04_Thruxton\RACE_11\laps.json
+British F4,Weekend 04 - Thruxton,Round 12,,24,19,4,15,21.1,29.5,0.0,71.921,5-8,data\british\2025\Weekend_04_Thruxton\RACE_12\laps.json
+British F4,Weekend 05 - Oulton Park,Round 13,,15,15,0,15,0.0,0.0,0.0,81.328,,data\british\2025\Weekend_05_Oulton_Park\RACE_13\laps.json
+British F4,Weekend 05 - Oulton Park,Round 14,,20,15,0,15,0.0,0.0,0.0,81.431,,data\british\2025\Weekend_05_Oulton_Park\RACE_14\laps.json
+British F4,Weekend 05 - Oulton Park,Round 15,,20,7,2,5,28.6,35.4,0.0,82.768,6-7,data\british\2025\Weekend_05_Oulton_Park\RACE_15\laps.json
+British F4,Weekend 06 - Zandvoort,Round 16,26-27 July 2025,27,12,1,11,8.3,12.0,0.0,98.635,2,data\british\2025\Weekend_06_Zandvoort\RACE_16\laps.json
+British F4,Weekend 06 - Zandvoort,Round 17,26-27 July 2025,27,11,0,11,0.0,0.0,0.0,98.865,,data\british\2025\Weekend_06_Zandvoort\RACE_17\laps.json
+British F4,Weekend 06 - Zandvoort,Round 18,26-27 July 2025,27,6,2,4,33.3,43.7,0.0,101.587,1;4,data\british\2025\Weekend_06_Zandvoort\RACE_18\laps.json
+British F4,Weekend 07 - Knockhill,Round 19,,23,20,0,20,0.0,0.0,0.0,49.016,,data\british\2025\Weekend_07_Knockhill\RACE_19\laps.json
+British F4,Weekend 07 - Knockhill,Round 20,,20,20,7,13,35.0,47.3,0.0,49.18,2-8,data\british\2025\Weekend_07_Knockhill\RACE_20\laps.json
+British F4,Weekend 07 - Knockhill,Round 21,,22,23,6,17,26.1,35.2,0.0,49.326,1-3;11-13,data\british\2025\Weekend_07_Knockhill\RACE_21\laps.json
+British F4,Weekend 08 - Donington Park GP,Round 22,,25,14,0,14,0.0,0.0,0.0,90.01,,data\british\2025\Weekend_08_Donington_Park_GP\RACE_22\laps.json
+British F4,Weekend 08 - Donington Park GP,Round 23,,25,14,0,14,0.0,0.0,0.0,90.444,,data\british\2025\Weekend_08_Donington_Park_GP\RACE_23\laps.json
+British F4,Weekend 08 - Donington Park GP,Round 24,,25,17,0,17,0.0,0.0,0.0,90.361,,data\british\2025\Weekend_08_Donington_Park_GP\RACE_24\laps.json
+British F4,Weekend 09 - Silverstone,Round 25,,24,22,0,22,0.0,0.0,0.0,54.911,,data\british\2025\Weekend_09_Silverstone\RACE_25\laps.json
+British F4,Weekend 09 - Silverstone,Round 26,,26,20,3,17,15.0,20.9,0.0,55.653,7-9,data\british\2025\Weekend_09_Silverstone\RACE_26\laps.json
+British F4,Weekend 09 - Silverstone,Round 27,,26,23,8,15,34.8,44.4,0.0,55.589,8-12;16-18,data\british\2025\Weekend_09_Silverstone\RACE_27\laps.json
+British F4,Weekend 10 - Brands Hatch GP,Round 28,,21,14,0,14,0.0,0.0,0.0,85.314,,data\british\2025\Weekend_10_Brands_Hatch_GP\RACE_28\laps.json
+British F4,Weekend 10 - Brands Hatch GP,Round 29,,23,14,0,14,0.0,0.0,0.0,85.53,,data\british\2025\Weekend_10_Brands_Hatch_GP\RACE_29\laps.json
+British F4,Weekend 10 - Brands Hatch GP,Round 30,,22,18,0,18,0.0,0.0,0.0,85.316,,data\british\2025\Weekend_10_Brands_Hatch_GP\RACE_30\laps.json

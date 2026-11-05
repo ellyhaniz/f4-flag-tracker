@@ -1,0 +1,23 @@
+series,event,race,date,cars,total_laps,neutralised_laps,green_laps,neutralised_pct,neutralised_time_pct,red_flag_minutes,median_green_lap_s,neutralised_lap_numbers,source
+Italian F4,Round 01 - Misano,RACE 1,ACI Racing Weeken,27,17,0,17,0.0,0.0,0.0,95.616,,data\italian\2025\Round_01_Misano\RACE_1\laps.json
+Italian F4,Round 01 - Misano,RACE 2,ACI Racing Weeken,24,15,2,13,13.3,18.6,0.0,96.187,2-3,data\italian\2025\Round_01_Misano\RACE_2\laps.json
+Italian F4,Round 01 - Misano,RACE 3,ACI Racing Weeken,26,17,1,16,5.9,8.8,0.0,95.706,2,data\italian\2025\Round_01_Misano\RACE_3\laps.json
+Italian F4,Round 01 - Misano,RACE 4,ACI Racing Weeken,35,17,0,17,0.0,0.0,0.0,96.157,,data\italian\2025\Round_01_Misano\RACE_4\laps.json
+Italian F4,Round 02 - Vallelunga,RACE 1,Italian F4 Champi,23,15,4,11,26.7,40.7,0.0,95.219,5-6;14-15,data\italian\2025\Round_02_Vallelunga\RACE_1\laps.json
+Italian F4,Round 02 - Vallelunga,RACE 2,Italian F4 Champi,26,16,2,14,12.5,18.3,0.0,95.288,2-3,data\italian\2025\Round_02_Vallelunga\RACE_2\laps.json
+Italian F4,Round 02 - Vallelunga,RACE 3,Italian F4 Champi,27,15,3,12,20.0,28.7,0.0,95.54,5-7,data\italian\2025\Round_02_Vallelunga\RACE_3\laps.json
+Italian F4,Round 02 - Vallelunga,RACE 4,Italian F4 Champi,32,15,4,11,26.7,37.3,0.0,95.117,1-4,data\italian\2025\Round_02_Vallelunga\RACE_4\laps.json
+Italian F4,Round 03 - Monza,RACE 1,Italian F4 Champi,36,14,4,10,28.6,41.1,0.0,114.815,3-4;7;10,data\italian\2025\Round_03_Monza\RACE_1\laps.json
+Italian F4,Round 03 - Monza,RACE 2,Italian F4 Champi,36,14,3,11,21.4,31.3,0.0,113.418,3-5,data\italian\2025\Round_03_Monza\RACE_2\laps.json
+Italian F4,Round 03 - Monza,RACE 3,Italian F4 Champi,37,11,5,6,45.5,60.3,0.0,115.638,2-4;8;10,data\italian\2025\Round_03_Monza\RACE_3\laps.json
+Italian F4,Round 04 - Mugello,RACE 1,Italian F4 Champi,36,15,4,11,26.7,35.9,0.0,111.053,4-5;12-13,data\italian\2025\Round_04_Mugello\RACE_1\laps.json
+Italian F4,Round 04 - Mugello,RACE 2,Italian F4 Champi,37,16,4,12,25.0,36.6,0.0,110.867,5-6;15-16,data\italian\2025\Round_04_Mugello\RACE_2\laps.json
+Italian F4,Round 04 - Mugello,RACE 3,Italian F4 Champi,35,17,0,17,0.0,0.0,0.0,111.852,,data\italian\2025\Round_04_Mugello\RACE_3\laps.json
+Italian F4,Round 05 - Imola,RACE 1,Italian F4 Champi,37,13,6,7,46.2,60.2,0.0,108.164,2-4;7-9,data\italian\2025\Round_05_Imola\RACE_1\laps.json
+Italian F4,Round 05 - Imola,RACE 2,Italian F4 Champi,33,16,1,15,6.2,9.8,0.0,96.949,8,data\italian\2025\Round_05_Imola\RACE_2\laps.json
+Italian F4,Round 05 - Imola,RACE 3,Italian F4 Champi,33,16,3,13,18.8,26.8,0.0,107.82,1-2;11,data\italian\2025\Round_05_Imola\RACE_3\laps.json
+Italian F4,Round 06 - Barcelona,RACE 1,1 51 Nakamura-Ber,17,19,0,19,0.0,0.0,0.0,105.008,,data\italian\2025\Round_06_Barcelona\RACE_1\laps.json
+Italian F4,Round 07 - Misano,RACE 1,ACI Racing Weeken,29,17,0,17,0.0,0.0,0.0,96.522,,data\italian\2025\Round_07_Misano\RACE_1\laps.json
+Italian F4,Round 07 - Misano,RACE 2,ACI Racing Weeken,29,17,0,17,0.0,0.0,0.0,96.683,,data\italian\2025\Round_07_Misano\RACE_2\laps.json
+Italian F4,Round 07 - Misano,RACE 3,ACI Racing Weeken,29,17,0,17,0.0,0.0,0.0,96.609,,data\italian\2025\Round_07_Misano\RACE_3\laps.json
+Italian F4,Round 07 - Misano,RACE 4,ACI Racing Weeken,35,16,1,15,6.2,9.3,0.0,96.611,5,data\italian\2025\Round_07_Misano\RACE_4\laps.json

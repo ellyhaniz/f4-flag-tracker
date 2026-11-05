@@ -1,0 +1,11 @@
+series,event,race,date,cars,total_laps,neutralised_laps,green_laps,neutralised_pct,neutralised_time_pct,red_flag_minutes,median_green_lap_s,neutralised_lap_numbers,source
+F4 Saudi Arabia,Round 01 - Bahrain International Circuit,RACE 1,2025-10-10,12,12,1,11,8.3,10.9,0.0,130.108,11,data\saudi\2025\Round_01\RACE_1\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 01 - Bahrain International Circuit,RACE 2,2025-10-10,14,10,3,7,30.0,42.4,0.0,128.541,2;5-6,data\saudi\2025\Round_01\RACE_2\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 02 - Bahrain International Circuit,RACE 1,2025-10-15,14,11,2,9,18.2,26.6,0.0,128.267,7-8,data\saudi\2025\Round_02\RACE_1\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 02 - Bahrain International Circuit,RACE 2,2025-10-15,14,12,0,12,0.0,0.0,0.0,129.312,,data\saudi\2025\Round_02\RACE_2\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 03 - Jeddah Corniche Circuit,RACE 1,2025-11-10,14,12,0,12,0.0,0.0,0.0,128.756,,data\saudi\2025\Round_03\RACE_1\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 03 - Jeddah Corniche Circuit,RACE 2,2025-11-10,14,11,1,10,9.1,20.8,0.0,128.072,1,data\saudi\2025\Round_03\RACE_2\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 04 - Jeddah Corniche Circuit,RACE 1,2025-11-14,14,12,0,12,0.0,0.0,0.0,145.201,,data\saudi\2025\Round_04\RACE_1\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 04 - Jeddah Corniche Circuit,RACE 2,2025-11-14,14,12,0,12,0.0,0.0,0.0,127.94,,data\saudi\2025\Round_04\RACE_2\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 05 - Jeddah Corniche Circuit,RACE 1,2025-12-05,14,12,0,12,0.0,0.0,0.0,129.108,,data\saudi\2025\Round_05\RACE_1\Lap_by_lap.xlsx
+F4 Saudi Arabia,Round 05 - Jeddah Corniche Circuit,RACE 2,2025-12-05,13,11,1,10,9.1,18.8,0.0,128.807,2,data\saudi\2025\Round_05\RACE_2\Lap_by_lap.xlsx

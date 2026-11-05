@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F4 Flag Tracker</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f5f4f1; --surface-1: #fcfcfb; --border: #e3e2de; --grid: #ebeae6;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #6f6e69;
+  --hl: #2a78d6; --hl-soft: #cde2fb; --other: #8a8984; --other-soft: #e3e2de;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211; --surface-1: #1a1a19; --border: #2e2e2c; --grid: #262624;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #9a998f;
+    --hl: #3987e5; --hl-soft: #184f95; --other: #75746f; --other-soft: #383835;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211; --surface-1: #1a1a19; --border: #2e2e2c; --grid: #262624;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #9a998f;
+  --hl: #3987e5; --hl-soft: #184f95; --other: #75746f; --other-soft: #383835;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 17px; margin: 0 0 4px; }
+.sub { color: var(--text-secondary); margin: 0 0 24px; max-width: 70ch; }
+.note { color: var(--text-muted); font-size: 13px; margin: 0 0 16px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; margin-bottom: 20px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+  margin-bottom: 20px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.tile.hl { border-color: var(--hl); box-shadow: inset 4px 0 0 var(--hl); }
+.tile .name { color: var(--text-secondary); font-size: 13px; font-weight: 600; }
+.tile .big { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .small { color: var(--text-muted); font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--text-secondary); font-size: 12px; }
+svg .lbl { fill: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin: 4px 0 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px;
+  vertical-align: -1px; }
+.tip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15); opacity: 0; transition: opacity .1s; max-width: 280px; z-index: 10; }
+.tip b { display: block; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+.controls button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); cursor: pointer; }
+.controls button[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-1); border-color: var(--text-primary); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; }
+th.num, td.num { text-align: right; }
+tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--hl); }
+.bar-cell { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+ul.caveats { margin: 0; padding-left: 18px; color: var(--text-secondary); font-size: 14px; }
+ul.caveats li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>F4 Flag Tracker — 2025</h1>
+  <p class="sub" id="lede"></p>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Share of laps neutralised</h2>
+      <p class="note">Safety Car / Full Course Yellow laps ÷ all race laps, whole season.</p>
+      <div id="bar-neut"></div>
+    </section>
+    <section class="card">
+      <h2>Races with no neutralised laps</h2>
+      <p class="note">Percentage of each series' races that ran fully green.</p>
+      <div id="bar-clean"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Every race, one dot each</h2>
+    <p class="note">Neutralised share of each race. Hover a dot for the race. Dots at 0% ran fully green.</p>
+    <div class="legend"><span><i style="background:var(--hl)"></i><span id="lg-hl"></span></span>
+      <span><i style="background:var(--other)"></i>Other series</span></div>
+    <div id="strip"></div>
+  </section>
+
+  <section class="card">
+    <h2>Race by race</h2>
+    <div class="controls" id="filters"></div>
+    <div class="table-wrap"><table id="tbl"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>How to read this — and what's missing</h2>
+    <ul class="caveats" id="caveats"></ul>
+    <p class="note" id="built" style="margin:12px 0 0"></p>
+  </section>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const DATA = {"rows": [{"series": "F4 Saudi Arabia", "event": "Round 01 - Bahrain International Circuit", "race": "RACE 1", "date": "2025-10-10", "cars": 12.0, "total_laps": 12.0, "neutralised_laps": 1.0, "green_laps": 11.0, "neutralised_pct": 8.3, "neutralised_time_pct": 10.9, "red_flag_minutes": 0.0, "median_green_lap_s": 130.108, "neutralised_lap_numbers": "11"}, {"series": "F4 Saudi Arabia", "event": "Round 01 - Bahrain International Circuit", "race": "RACE 2", "date": "2025-10-10", "cars": 14.0, "total_laps": 10.0, "neutralised_laps": 3.0, "green_laps": 7.0, "neutralised_pct": 30.0, "neutralised_time_pct": 42.4, "red_flag_minutes": 0.0, "median_green_lap_s": 128.541, "neutralised_lap_numbers": "2;5-6"}, {"series": "F4 Saudi Arabia", "event": "Round 02 - Bahrain International Circuit", "race": "RACE 1", "date": "2025-10-15", "cars": 14.0, "total_laps": 11.0, "neutralised_laps": 2.0, "green_laps": 9.0, "neutralised_pct": 18.2, "neutralised_time_pct": 26.6, "red_flag_minutes": 0.0, "median_green_lap_s": 128.267, "neutralised_lap_numbers": "7-8"}, {"series": "F4 Saudi Arabia", "event": "Round 02 - Bahrain International Circuit", "race": "RACE 2", "date": "2025-10-15", "cars": 14.0, "total_laps": 12.0, "neutralised_laps": 0.0, "green_laps": 12.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 129.312, "neutralised_lap_numbers": ""}, {"series": "F4 Saudi Arabia", "event": "Round 03 - Jeddah Corniche Circuit", "race": "RACE 1", "date": "2025-11-10", "cars": 14.0, "total_laps": 12.0, "neutralised_laps": 0.0, "green_laps": 12.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 128.756, "neutralised_lap_numbers": ""}, {"series": "F4 Saudi Arabia", "event": "Round 03 - Jeddah Corniche Circuit", "race": "RACE 2", "date": "2025-11-10", "cars": 14.0, "total_laps": 11.0, "neutralised_laps": 1.0, "green_laps": 10.0, "neutralised_pct": 9.1, "neutralised_time_pct": 20.8, "red_flag_minutes": 0.0, "median_green_lap_s": 128.072, "neutralised_lap_numbers": "1"}, {"series": "F4 Saudi Arabia", "event": "Round 04 - Jeddah Corniche Circuit", "race": "RACE 1", "date": "2025-11-14", "cars": 14.0, "total_laps": 12.0, "neutralised_laps": 0.0, "green_laps": 12.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 145.201, "neutralised_lap_numbers": ""}, {"series": "F4 Saudi Arabia", "event": "Round 04 - Jeddah Corniche Circuit", "race": "RACE 2", "date": "2025-11-14", "cars": 14.0, "total_laps": 12.0, "neutralised_laps": 0.0, "green_laps": 12.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 127.94, "neutralised_lap_numbers": ""}, {"series": "F4 Saudi Arabia", "event": "Round 05 - Jeddah Corniche Circuit", "race": "RACE 1", "date": "2025-12-05", "cars": 14.0, "total_laps": 12.0, "neutralised_laps": 0.0, "green_laps": 12.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 129.108, "neutralised_lap_numbers": ""}, {"series": "F4 Saudi Arabia", "event": "Round 05 - Jeddah Corniche Circuit", "race": "RACE 2", "date": "2025-12-05", "cars": 13.0, "total_laps": 11.0, "neutralised_laps": 1.0, "green_laps": 10.0, "neutralised_pct": 9.1, "neutralised_time_pct": 18.8, "red_flag_minutes": 0.0, "median_green_lap_s": 128.807, "neutralised_lap_numbers": "2"}, {"series": "F4 Middle East", "event": "Round 01 - Yas Marina (GP)", "race": "RACE 1", "date": "", "cars": 28.0, "total_laps": 15.0, "neutralised_laps": 2.0, "green_laps": 13.0, "neutralised_pct": 13.3, "neutralised_time_pct": 22.3, "red_flag_minutes": 0.0, "median_green_lap_s": 107.767, "neutralised_lap_numbers": "2;8"}, {"series": "F4 Middle East", "event": "Round 01 - Yas Marina (GP)", "race": "RACE 2", "date": "", "cars": 29.0, "total_laps": 16.0, "neutralised_laps": 2.0, "green_laps": 14.0, "neutralised_pct": 12.5, "neutralised_time_pct": 17.5, "red_flag_minutes": 0.0, "median_green_lap_s": 107.331, "neutralised_lap_numbers": "7-8"}, {"series": "F4 Middle East", "event": "Round 01 - Yas Marina (GP)", "race": "RACE 3", "date": "", "cars": 26.0, "total_laps": 12.0, "neutralised_laps": 5.0, "green_laps": 7.0, "neutralised_pct": 41.7, "neutralised_time_pct": 75.0, "red_flag_minutes": 26.9, "median_green_lap_s": 108.067, "neutralised_lap_numbers": "2-3;6-7;9"}, {"series": "F4 Middle East", "event": "Round 02 - Yas Marina (Corkscrew)", "race": "RACE 1", "date": "", "cars": 28.0, "total_laps": 14.0, "neutralised_laps": 2.0, "green_laps": 12.0, "neutralised_pct": 14.3, "neutralised_time_pct": 24.0, "red_flag_minutes": 0.0, "median_green_lap_s": 116.636, "neutralised_lap_numbers": "2-3"}, {"series": "F4 Middle East", "event": "Round 02 - Yas Marina (Corkscrew)", "race": "RACE 2", "date": "", "cars": 29.0, "total_laps": 15.0, "neutralised_laps": 1.0, "green_laps": 14.0, "neutralised_pct": 6.7, "neutralised_time_pct": 10.6, "red_flag_minutes": 0.0, "median_green_lap_s": 116.984, "neutralised_lap_numbers": "6"}, {"series": "F4 Middle East", "event": "Round 02 - Yas Marina (Corkscrew)", "race": "RACE 3", "date": "", "cars": 26.0, "total_laps": 11.0, "neutralised_laps": 5.0, "green_laps": 6.0, "neutralised_pct": 45.5, "neutralised_time_pct": 59.7, "red_flag_minutes": 0.0, "median_green_lap_s": 117.732, "neutralised_lap_numbers": "2-3;8-10"}, {"series": "F4 Middle East", "event": "Round 03 - Dubai Autodrome", "race": "RACE 1", "date": "9 February 2025", "cars": 28.0, "total_laps": 10.0, "neutralised_laps": 5.0, "green_laps": 5.0, "neutralised_pct": 50.0, "neutralised_time_pct": 58.0, "red_flag_minutes": 0.0, "median_green_lap_s": 126.294, "neutralised_lap_numbers": "3-5;7;9"}, {"series": "F4 Middle East", "event": "Round 03 - Dubai Autodrome", "race": "RACE 2", "date": "9 February 2025", "cars": 27.0, "total_laps": 14.0, "neutralised_laps": 2.0, "green_laps": 12.0, "neutralised_pct": 14.3, "neutralised_time_pct": 19.9, "red_flag_minutes": 0.0, "median_green_lap_s": 123.138, "neutralised_lap_numbers": "3-4"}, {"series": "F4 Middle East", "event": "Round 03 - Dubai Autodrome", "race": "RACE 3", "date": "9 February 2025", "cars": 27.0, "total_laps": 15.0, "neutralised_laps": 0.0, "green_laps": 15.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 122.832, "neutralised_lap_numbers": ""}, {"series": "F4 Middle East", "event": "Round 04 - Yas Marina (GP)", "race": "RACE 1", "date": "", "cars": 27.0, "total_laps": 16.0, "neutralised_laps": 0.0, "green_laps": 16.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 116.468, "neutralised_lap_numbers": ""}, {"series": "F4 Middle East", "event": "Round 04 - Yas Marina (GP)", "race": "RACE 2", "date": "", "cars": 27.0, "total_laps": 16.0, "neutralised_laps": 0.0, "green_laps": 16.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 116.914, "neutralised_lap_numbers": ""}, {"series": "F4 Middle East", "event": "Round 04 - Yas Marina (GP)", "race": "RACE 3", "date": "", "cars": 27.0, "total_laps": 15.0, "neutralised_laps": 2.0, "green_laps": 13.0, "neutralised_pct": 13.3, "neutralised_time_pct": 18.6, "red_flag_minutes": 0.0, "median_green_lap_s": 117.117, "neutralised_lap_numbers": "6-7"}, {"series": "Italian F4", "event": "Round 01 - Misano", "race": "RACE 1", "date": "ACI Racing Weeken", "cars": 27.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 95.616, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 01 - Misano", "race": "RACE 2", "date": "ACI Racing Weeken", "cars": 24.0, "total_laps": 15.0, "neutralised_laps": 2.0, "green_laps": 13.0, "neutralised_pct": 13.3, "neutralised_time_pct": 18.6, "red_flag_minutes": 0.0, "median_green_lap_s": 96.187, "neutralised_lap_numbers": "2-3"}, {"series": "Italian F4", "event": "Round 01 - Misano", "race": "RACE 3", "date": "ACI Racing Weeken", "cars": 26.0, "total_laps": 17.0, "neutralised_laps": 1.0, "green_laps": 16.0, "neutralised_pct": 5.9, "neutralised_time_pct": 8.8, "red_flag_minutes": 0.0, "median_green_lap_s": 95.706, "neutralised_lap_numbers": "2"}, {"series": "Italian F4", "event": "Round 01 - Misano", "race": "RACE 4", "date": "ACI Racing Weeken", "cars": 35.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 96.157, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 02 - Vallelunga", "race": "RACE 1", "date": "Italian F4 Champi", "cars": 23.0, "total_laps": 15.0, "neutralised_laps": 4.0, "green_laps": 11.0, "neutralised_pct": 26.7, "neutralised_time_pct": 40.7, "red_flag_minutes": 0.0, "median_green_lap_s": 95.219, "neutralised_lap_numbers": "5-6;14-15"}, {"series": "Italian F4", "event": "Round 02 - Vallelunga", "race": "RACE 2", "date": "Italian F4 Champi", "cars": 26.0, "total_laps": 16.0, "neutralised_laps": 2.0, "green_laps": 14.0, "neutralised_pct": 12.5, "neutralised_time_pct": 18.3, "red_flag_minutes": 0.0, "median_green_lap_s": 95.288, "neutralised_lap_numbers": "2-3"}, {"series": "Italian F4", "event": "Round 02 - Vallelunga", "race": "RACE 3", "date": "Italian F4 Champi", "cars": 27.0, "total_laps": 15.0, "neutralised_laps": 3.0, "green_laps": 12.0, "neutralised_pct": 20.0, "neutralised_time_pct": 28.7, "red_flag_minutes": 0.0, "median_green_lap_s": 95.54, "neutralised_lap_numbers": "5-7"}, {"series": "Italian F4", "event": "Round 02 - Vallelunga", "race": "RACE 4", "date": "Italian F4 Champi", "cars": 32.0, "total_laps": 15.0, "neutralised_laps": 4.0, "green_laps": 11.0, "neutralised_pct": 26.7, "neutralised_time_pct": 37.3, "red_flag_minutes": 0.0, "median_green_lap_s": 95.117, "neutralised_lap_numbers": "1-4"}, {"series": "Italian F4", "event": "Round 03 - Monza", "race": "RACE 1", "date": "Italian F4 Champi", "cars": 36.0, "total_laps": 14.0, "neutralised_laps": 4.0, "green_laps": 10.0, "neutralised_pct": 28.6, "neutralised_time_pct": 41.1, "red_flag_minutes": 0.0, "median_green_lap_s": 114.815, "neutralised_lap_numbers": "3-4;7;10"}, {"series": "Italian F4", "event": "Round 03 - Monza", "race": "RACE 2", "date": "Italian F4 Champi", "cars": 36.0, "total_laps": 14.0, "neutralised_laps": 3.0, "green_laps": 11.0, "neutralised_pct": 21.4, "neutralised_time_pct": 31.3, "red_flag_minutes": 0.0, "median_green_lap_s": 113.418, "neutralised_lap_numbers": "3-5"}, {"series": "Italian F4", "event": "Round 03 - Monza", "race": "RACE 3", "date": "Italian F4 Champi", "cars": 37.0, "total_laps": 11.0, "neutralised_laps": 5.0, "green_laps": 6.0, "neutralised_pct": 45.5, "neutralised_time_pct": 60.3, "red_flag_minutes": 0.0, "median_green_lap_s": 115.638, "neutralised_lap_numbers": "2-4;8;10"}, {"series": "Italian F4", "event": "Round 04 - Mugello", "race": "RACE 1", "date": "Italian F4 Champi", "cars": 36.0, "total_laps": 15.0, "neutralised_laps": 4.0, "green_laps": 11.0, "neutralised_pct": 26.7, "neutralised_time_pct": 35.9, "red_flag_minutes": 0.0, "median_green_lap_s": 111.053, "neutralised_lap_numbers": "4-5;12-13"}, {"series": "Italian F4", "event": "Round 04 - Mugello", "race": "RACE 2", "date": "Italian F4 Champi", "cars": 37.0, "total_laps": 16.0, "neutralised_laps": 4.0, "green_laps": 12.0, "neutralised_pct": 25.0, "neutralised_time_pct": 36.6, "red_flag_minutes": 0.0, "median_green_lap_s": 110.867, "neutralised_lap_numbers": "5-6;15-16"}, {"series": "Italian F4", "event": "Round 04 - Mugello", "race": "RACE 3", "date": "Italian F4 Champi", "cars": 35.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 111.852, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 05 - Imola", "race": "RACE 1", "date": "Italian F4 Champi", "cars": 37.0, "total_laps": 13.0, "neutralised_laps": 6.0, "green_laps": 7.0, "neutralised_pct": 46.2, "neutralised_time_pct": 60.2, "red_flag_minutes": 0.0, "median_green_lap_s": 108.164, "neutralised_lap_numbers": "2-4;7-9"}, {"series": "Italian F4", "event": "Round 05 - Imola", "race": "RACE 2", "date": "Italian F4 Champi", "cars": 33.0, "total_laps": 16.0, "neutralised_laps": 1.0, "green_laps": 15.0, "neutralised_pct": 6.2, "neutralised_time_pct": 9.8, "red_flag_minutes": 0.0, "median_green_lap_s": 96.949, "neutralised_lap_numbers": "8"}, {"series": "Italian F4", "event": "Round 05 - Imola", "race": "RACE 3", "date": "Italian F4 Champi", "cars": 33.0, "total_laps": 16.0, "neutralised_laps": 3.0, "green_laps": 13.0, "neutralised_pct": 18.8, "neutralised_time_pct": 26.8, "red_flag_minutes": 0.0, "median_green_lap_s": 107.82, "neutralised_lap_numbers": "1-2;11"}, {"series": "Italian F4", "event": "Round 06 - Barcelona", "race": "RACE 1", "date": "1 51 Nakamura-Ber", "cars": 17.0, "total_laps": 19.0, "neutralised_laps": 0.0, "green_laps": 19.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 105.008, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 07 - Misano", "race": "RACE 1", "date": "ACI Racing Weeken", "cars": 29.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 96.522, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 07 - Misano", "race": "RACE 2", "date": "ACI Racing Weeken", "cars": 29.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 96.683, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 07 - Misano", "race": "RACE 3", "date": "ACI Racing Weeken", "cars": 29.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 96.609, "neutralised_lap_numbers": ""}, {"series": "Italian F4", "event": "Round 07 - Misano", "race": "RACE 4", "date": "ACI Racing Weeken", "cars": 35.0, "total_laps": 16.0, "neutralised_laps": 1.0, "green_laps": 15.0, "neutralised_pct": 6.2, "neutralised_time_pct": 9.3, "red_flag_minutes": 0.0, "median_green_lap_s": 96.611, "neutralised_lap_numbers": "5"}, {"series": "British F4", "event": "Weekend 01 - Donington Park", "race": "Round 1", "date": "", "cars": 21.0, "total_laps": 15.0, "neutralised_laps": 6.0, "green_laps": 9.0, "neutralised_pct": 40.0, "neutralised_time_pct": 49.9, "red_flag_minutes": 0.0, "median_green_lap_s": 66.377, "neutralised_lap_numbers": "6-7;9-12"}, {"series": "British F4", "event": "Weekend 01 - Donington Park", "race": "Round 2", "date": "", "cars": 20.0, "total_laps": 13.0, "neutralised_laps": 3.0, "green_laps": 10.0, "neutralised_pct": 23.1, "neutralised_time_pct": 30.5, "red_flag_minutes": 0.0, "median_green_lap_s": 65.958, "neutralised_lap_numbers": "4-6"}, {"series": "British F4", "event": "Weekend 01 - Donington Park", "race": "Round 3", "date": "", "cars": 21.0, "total_laps": 18.0, "neutralised_laps": 1.0, "green_laps": 17.0, "neutralised_pct": 5.6, "neutralised_time_pct": 8.2, "red_flag_minutes": 0.0, "median_green_lap_s": 66.323, "neutralised_lap_numbers": "7"}, {"series": "British F4", "event": "Weekend 02 - Silverstone GP", "race": "Round 4", "date": "", "cars": 20.0, "total_laps": 9.0, "neutralised_laps": 2.0, "green_laps": 7.0, "neutralised_pct": 22.2, "neutralised_time_pct": 31.1, "red_flag_minutes": 0.0, "median_green_lap_s": 122.446, "neutralised_lap_numbers": "2;7"}, {"series": "British F4", "event": "Weekend 02 - Silverstone GP", "race": "Round 5", "date": "", "cars": 21.0, "total_laps": 9.0, "neutralised_laps": 1.0, "green_laps": 8.0, "neutralised_pct": 11.1, "neutralised_time_pct": 17.9, "red_flag_minutes": 0.0, "median_green_lap_s": 122.403, "neutralised_lap_numbers": "8"}, {"series": "British F4", "event": "Weekend 02 - Silverstone GP", "race": "Round 6", "date": "", "cars": 20.0, "total_laps": 11.0, "neutralised_laps": 2.0, "green_laps": 9.0, "neutralised_pct": 18.2, "neutralised_time_pct": 26.9, "red_flag_minutes": 0.0, "median_green_lap_s": 122.609, "neutralised_lap_numbers": "6-7"}, {"series": "British F4", "event": "Weekend 03 - Snetterton", "race": "Round 7", "date": "", "cars": 23.0, "total_laps": 11.0, "neutralised_laps": 0.0, "green_laps": 11.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 110.573, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 03 - Snetterton", "race": "Round 8", "date": "", "cars": 23.0, "total_laps": 11.0, "neutralised_laps": 0.0, "green_laps": 11.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 110.341, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 03 - Snetterton", "race": "Round 9", "date": "", "cars": 22.0, "total_laps": 14.0, "neutralised_laps": 0.0, "green_laps": 14.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 109.829, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 04 - Thruxton", "race": "Round 10", "date": "", "cars": 18.0, "total_laps": 5.0, "neutralised_laps": 4.0, "green_laps": 1.0, "neutralised_pct": 80.0, "neutralised_time_pct": 85.9, "red_flag_minutes": 0.0, "median_green_lap_s": 76.102, "neutralised_lap_numbers": "1;3-5"}, {"series": "British F4", "event": "Weekend 04 - Thruxton", "race": "Round 11", "date": "", "cars": 24.0, "total_laps": 15.0, "neutralised_laps": 1.0, "green_laps": 14.0, "neutralised_pct": 6.7, "neutralised_time_pct": 10.2, "red_flag_minutes": 0.0, "median_green_lap_s": 79.522, "neutralised_lap_numbers": "1"}, {"series": "British F4", "event": "Weekend 04 - Thruxton", "race": "Round 12", "date": "", "cars": 24.0, "total_laps": 19.0, "neutralised_laps": 4.0, "green_laps": 15.0, "neutralised_pct": 21.1, "neutralised_time_pct": 29.5, "red_flag_minutes": 0.0, "median_green_lap_s": 71.921, "neutralised_lap_numbers": "5-8"}, {"series": "British F4", "event": "Weekend 05 - Oulton Park", "race": "Round 13", "date": "", "cars": 15.0, "total_laps": 15.0, "neutralised_laps": 0.0, "green_laps": 15.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 81.328, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 05 - Oulton Park", "race": "Round 14", "date": "", "cars": 20.0, "total_laps": 15.0, "neutralised_laps": 0.0, "green_laps": 15.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 81.431, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 05 - Oulton Park", "race": "Round 15", "date": "", "cars": 20.0, "total_laps": 7.0, "neutralised_laps": 2.0, "green_laps": 5.0, "neutralised_pct": 28.6, "neutralised_time_pct": 35.4, "red_flag_minutes": 0.0, "median_green_lap_s": 82.768, "neutralised_lap_numbers": "6-7"}, {"series": "British F4", "event": "Weekend 06 - Zandvoort", "race": "Round 16", "date": "26-27 July 2025", "cars": 27.0, "total_laps": 12.0, "neutralised_laps": 1.0, "green_laps": 11.0, "neutralised_pct": 8.3, "neutralised_time_pct": 12.0, "red_flag_minutes": 0.0, "median_green_lap_s": 98.635, "neutralised_lap_numbers": "2"}, {"series": "British F4", "event": "Weekend 06 - Zandvoort", "race": "Round 17", "date": "26-27 July 2025", "cars": 27.0, "total_laps": 11.0, "neutralised_laps": 0.0, "green_laps": 11.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 98.865, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 06 - Zandvoort", "race": "Round 18", "date": "26-27 July 2025", "cars": 27.0, "total_laps": 6.0, "neutralised_laps": 2.0, "green_laps": 4.0, "neutralised_pct": 33.3, "neutralised_time_pct": 43.7, "red_flag_minutes": 0.0, "median_green_lap_s": 101.587, "neutralised_lap_numbers": "1;4"}, {"series": "British F4", "event": "Weekend 07 - Knockhill", "race": "Round 19", "date": "", "cars": 23.0, "total_laps": 20.0, "neutralised_laps": 0.0, "green_laps": 20.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 49.016, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 07 - Knockhill", "race": "Round 20", "date": "", "cars": 20.0, "total_laps": 20.0, "neutralised_laps": 7.0, "green_laps": 13.0, "neutralised_pct": 35.0, "neutralised_time_pct": 47.3, "red_flag_minutes": 0.0, "median_green_lap_s": 49.18, "neutralised_lap_numbers": "2-8"}, {"series": "British F4", "event": "Weekend 07 - Knockhill", "race": "Round 21", "date": "", "cars": 22.0, "total_laps": 23.0, "neutralised_laps": 6.0, "green_laps": 17.0, "neutralised_pct": 26.1, "neutralised_time_pct": 35.2, "red_flag_minutes": 0.0, "median_green_lap_s": 49.326, "neutralised_lap_numbers": "1-3;11-13"}, {"series": "British F4", "event": "Weekend 08 - Donington Park GP", "race": "Round 22", "date": "", "cars": 25.0, "total_laps": 14.0, "neutralised_laps": 0.0, "green_laps": 14.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 90.01, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 08 - Donington Park GP", "race": "Round 23", "date": "", "cars": 25.0, "total_laps": 14.0, "neutralised_laps": 0.0, "green_laps": 14.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 90.444, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 08 - Donington Park GP", "race": "Round 24", "date": "", "cars": 25.0, "total_laps": 17.0, "neutralised_laps": 0.0, "green_laps": 17.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 90.361, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 09 - Silverstone", "race": "Round 25", "date": "", "cars": 24.0, "total_laps": 22.0, "neutralised_laps": 0.0, "green_laps": 22.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 54.911, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 09 - Silverstone", "race": "Round 26", "date": "", "cars": 26.0, "total_laps": 20.0, "neutralised_laps": 3.0, "green_laps": 17.0, "neutralised_pct": 15.0, "neutralised_time_pct": 20.9, "red_flag_minutes": 0.0, "median_green_lap_s": 55.653, "neutralised_lap_numbers": "7-9"}, {"series": "British F4", "event": "Weekend 09 - Silverstone", "race": "Round 27", "date": "", "cars": 26.0, "total_laps": 23.0, "neutralised_laps": 8.0, "green_laps": 15.0, "neutralised_pct": 34.8, "neutralised_time_pct": 44.4, "red_flag_minutes": 0.0, "median_green_lap_s": 55.589, "neutralised_lap_numbers": "8-12;16-18"}, {"series": "British F4", "event": "Weekend 10 - Brands Hatch GP", "race": "Round 28", "date": "", "cars": 21.0, "total_laps": 14.0, "neutralised_laps": 0.0, "green_laps": 14.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 85.314, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 10 - Brands Hatch GP", "race": "Round 29", "date": "", "cars": 23.0, "total_laps": 14.0, "neutralised_laps": 0.0, "green_laps": 14.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 85.53, "neutralised_lap_numbers": ""}, {"series": "British F4", "event": "Weekend 10 - Brands Hatch GP", "race": "Round 30", "date": "", "cars": 22.0, "total_laps": 18.0, "neutralised_laps": 0.0, "green_laps": 18.0, "neutralised_pct": 0.0, "neutralised_time_pct": 0.0, "red_flag_minutes": 0.0, "median_green_lap_s": 85.316, "neutralised_lap_numbers": ""}], "summary": [{"series": "F4 Saudi Arabia", "races": 10, "laps": 115, "neutralised": 8, "neutralised_pct": 7.0, "green_per_race": 10.7, "clean_races": 5, "clean_pct": 50, "worst": {"series": "F4 Saudi Arabia", "event": "Round 01 - Bahrain International Circuit", "race": "RACE 2", "date": "2025-10-10", "cars": 14.0, "total_laps": 10.0, "neutralised_laps": 3.0, "green_laps": 7.0, "neutralised_pct": 30.0, "neutralised_time_pct": 42.4, "red_flag_minutes": 0.0, "median_green_lap_s": 128.541, "neutralised_lap_numbers": "2;5-6"}}, {"series": "F4 Middle East", "races": 12, "laps": 169, "neutralised": 26, "neutralised_pct": 15.4, "green_per_race": 11.9, "clean_races": 3, "clean_pct": 25, "worst": {"series": "F4 Middle East", "event": "Round 03 - Dubai Autodrome", "race": "RACE 1", "date": "9 February 2025", "cars": 28.0, "total_laps": 10.0, "neutralised_laps": 5.0, "green_laps": 5.0, "neutralised_pct": 50.0, "neutralised_time_pct": 58.0, "red_flag_minutes": 0.0, "median_green_lap_s": 126.294, "neutralised_lap_numbers": "3-5;7;9"}}, {"series": "Italian F4", "races": 22, "laps": 345, "neutralised": 47, "neutralised_pct": 13.6, "green_per_race": 13.5, "clean_races": 7, "clean_pct": 32, "worst": {"series": "Italian F4", "event": "Round 05 - Imola", "race": "RACE 1", "date": "Italian F4 Champi", "cars": 37.0, "total_laps": 13.0, "neutralised_laps": 6.0, "green_laps": 7.0, "neutralised_pct": 46.2, "neutralised_time_pct": 60.2, "red_flag_minutes": 0.0, "median_green_lap_s": 108.164, "neutralised_lap_numbers": "2-4;7-9"}}, {"series": "British F4", "races": 30, "laps": 435, "neutralised": 53, "neutralised_pct": 12.2, "green_per_race": 12.7, "clean_races": 14, "clean_pct": 47, "worst": {"series": "British F4", "event": "Weekend 04 - Thruxton", "race": "Round 10", "date": "", "cars": 18.0, "total_laps": 5.0, "neutralised_laps": 4.0, "green_laps": 1.0, "neutralised_pct": 80.0, "neutralised_time_pct": 85.9, "red_flag_minutes": 0.0, "median_green_lap_s": 76.102, "neutralised_lap_numbers": "1;3-5"}}], "highlight": "F4 Saudi Arabia", "caveats": ["F4 Middle East Round 5 (Lusail, 3 races) is not published online, so 12 of 15 races are included.", "Italian F4 Barcelona Race 2 has no published timing (Race 3 there was abandoned).", "British F4 Zandvoort Rounds 17 and 18 were red-flagged; only the post-restart laps are published.", "Red-flag minutes are only detected when the stoppage sits inside one timed lap (F4 Middle East). Where timing restarts after a red flag (most British/Italian cases) the stopped time is not counted.", "Laps are classified from lap times only: a lap counts as neutralised when the top-3 finishers' median lap is more than 25% slower than normal race pace. Not yet cross-checked with race control."], "built": "2026-11-06"};
+const HL = DATA.highlight;
+const $ = (id) => document.getElementById(id);
+const fmt = (n, d = 1) => Number(n).toFixed(d);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const isHL = (s) => s === HL;
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+// ---------- tooltip ----------
+const tip = $("tip");
+function showTip(html, ev) { tip.innerHTML = html; tip.style.opacity = 1; moveTip(ev); }
+function moveTip(ev) { const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad; if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px"; }
+function hideTip() { tip.style.opacity = 0; }
+
+// ---------- headline ----------
+const sum = DATA.summary;
+const hl = sum.find(s => isHL(s.series));
+const others = sum.filter(s => !isHL(s.series));
+if (hl && others.length) {
+  const avg = others.reduce((a, s) => a + s.neutralised, 0) / others.reduce((a, s) => a + s.laps, 0) * 100;
+  $("lede").textContent = `${HL} lost ${fmt(hl.neutralised_pct)}% of its race laps to Safety Car or Full Course `
+    + `Yellow periods, against ${fmt(avg)}% across ${others.map(s => s.series).join(", ")} combined `
+    + `— about ${fmt(avg / hl.neutralised_pct, 1)}× less neutralised running.`;
+}
+$("lg-hl").textContent = HL;
+
+// ---------- tiles ----------
+const order = [...sum].sort((a, b) => a.neutralised_pct - b.neutralised_pct);
+$("tiles").innerHTML = order.map(s => `
+  <div class="tile ${isHL(s.series) ? "hl" : ""}">
+    <div class="name">${esc(s.series)}</div>
+    <div class="big">${fmt(s.neutralised_pct)}%</div>
+    <div class="small">${s.neutralised} of ${s.laps} laps neutralised · ${s.races} races</div>
+    <div class="small">${fmt(s.green_per_race)} green laps per race</div>
+  </div>`).join("");
+
+// ---------- horizontal bar chart ----------
+function hbar(target, items, valueKey, labelFn, tipFn) {
+  const W = 480, rowH = 40, left = 130, right = 56, H = items.length * rowH + 8;
+  const max = Math.max(...items.map(d => d[valueKey])) * 1.05 || 1;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": items.map(d => `${d.series} ${labelFn(d)}`).join(", ") });
+  const x = v => left + (W - left - right) * v / max;
+  items.forEach((d, i) => {
+    const y = i * rowH + 8, bh = 20;
+    el("text", { x: left - 10, y: y + bh / 2 + 4, "text-anchor": "end",
+      style: isHL(d.series) ? "fill:var(--text-primary);font-weight:600" : "" }, svg).textContent = d.series;
+    const w = Math.max(2, x(d[valueKey]) - left);
+    // bar anchored at the baseline: square at the axis, 4px rounded at the data end
+    el("path", { d: `M${left},${y} h${w - 4} a4,4 0 0 1 4,4 v${bh - 8} a4,4 0 0 1 -4,4 h${-(w - 4)} z`,
+      fill: isHL(d.series) ? "var(--hl)" : "var(--other)" }, svg);
+    el("text", { x: left + w + 8, y: y + bh / 2 + 4, class: "lbl" }, svg).textContent = labelFn(d);
+    const hit = el("rect", { x: 0, y: y - 8, width: W, height: rowH, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", ev => showTip(tipFn(d), ev));
+    hit.addEventListener("mouseleave", hideTip);
+  });
+  el("line", { x1: left, x2: left, y1: 0, y2: H, stroke: "var(--border)" }, svg);
+  $(target).appendChild(svg);
+}
+hbar("bar-neut", order, "neutralised_pct", d => fmt(d.neutralised_pct) + "%",
+  d => `<b>${esc(d.series)}</b>${d.neutralised} of ${d.laps} laps neutralised<br>Worst race: ${esc(d.worst.event)} ${esc(d.worst.race)} (${fmt(d.worst.neutralised_pct)}%)`);
+hbar("bar-clean", [...sum].sort((a, b) => b.clean_pct - a.clean_pct), "clean_pct", d => d.clean_pct + "%",
+  d => `<b>${esc(d.series)}</b>${d.clean_races} of ${d.races} races fully green`);
+
+// ---------- strip plot: one dot per race ----------
+(function strip() {
+  const W = 960, left = 130, right = 24, rowH = 54, top = 8, bottom = 28;
+  const series = order.map(s => s.series), H = top + series.length * rowH + bottom;
+  const max = Math.max(50, Math.ceil(Math.max(...DATA.rows.map(r => r.neutralised_pct)) / 10) * 10);
+  const x = v => left + (W - left - right) * v / max;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Neutralised share of every race, by series" });
+  for (let t = 0; t <= max; t += 10) {
+    el("line", { x1: x(t), x2: x(t), y1: top, y2: H - bottom, stroke: "var(--grid)" }, svg);
+    el("text", { x: x(t), y: H - 8, "text-anchor": "middle" }, svg).textContent = t + "%";
+  }
+  series.forEach((s, i) => {
+    const cy = top + i * rowH + rowH / 2;
+    el("text", { x: left - 12, y: cy + 4, "text-anchor": "end",
+      style: isHL(s) ? "fill:var(--text-primary);font-weight:600" : "" }, svg).textContent = s;
+    const rs = DATA.rows.filter(r => r.series === s);
+    // Group races with the same (rounded) value. Small ties stack vertically inside the row;
+    // big ties (e.g. many fully-green races at 0%) collapse into one dot with a count label.
+    const groups = {};
+    rs.forEach(r => (groups[Math.round(r.neutralised_pct)] ||= []).push(r));
+    Object.values(groups).forEach(g => {
+      const big = g.length > 4;
+      (big ? [g] : g.map(r => [r])).forEach((members, j) => {
+        const r = members[0], off = big ? 0 : (j % 2 ? 1 : -1) * Math.ceil(j / 2) * 9;
+        const cx = x(r.neutralised_pct), rad = big ? 7 : 5;
+        const c = el("circle", { cx, cy: cy + off, r: rad,
+          fill: isHL(s) ? "var(--hl)" : "var(--other)", stroke: "var(--surface-1)", "stroke-width": 2 }, svg);
+        if (big) el("text", { x: cx + 12, y: cy + 4, class: "lbl" }, svg).textContent = `×${members.length}`;
+        const hit = el("circle", { cx, cy: cy + off, r: 11, fill: "transparent" }, svg);
+        const html = big
+          ? `<b>${esc(s)}</b>${members.length} races at ${fmt(r.neutralised_pct, 0)}% neutralised:<br>`
+            + members.map(m => `${esc(m.event)} · ${esc(m.race)}`).join("<br>")
+          : `<b>${esc(r.series)}</b>${esc(r.event)} · ${esc(r.race)}<br>${r.neutralised_laps} of ${r.total_laps} laps neutralised (${fmt(r.neutralised_pct)}%)`
+            + (r.neutralised_lap_numbers ? `<br>Laps: ${esc(r.neutralised_lap_numbers)}` : "");
+        hit.addEventListener("mousemove", ev => { c.setAttribute("r", rad + 2); showTip(html, ev); });
+        hit.addEventListener("mouseleave", () => { c.setAttribute("r", rad); hideTip(); });
+      });
+    });
+  });
+  $("strip").appendChild(svg);
+})();
+
+// ---------- table with filter + sort ----------
+const COLS = [
+  ["series", "Series"], ["event", "Event"], ["race", "Race"], ["total_laps", "Laps", 1],
+  ["neutralised_laps", "Neutralised", 1], ["neutralised_pct", "Neutralised %", 1],
+  ["green_laps", "Green laps", 1], ["red_flag_minutes", "Red flag (min)", 1],
+  ["neutralised_lap_numbers", "Which laps"],
+];
+let filter = "All", sortKey = null, sortDir = 1;
+const fwrap = $("filters");
+["All", ...order.map(s => s.series)].forEach(name => {
+  const b = document.createElement("button"); b.textContent = name; b.setAttribute("aria-pressed", name === filter);
+  b.onclick = () => { filter = name; [...fwrap.children].forEach(c => c.setAttribute("aria-pressed", c === b)); renderTable(); };
+  fwrap.appendChild(b);
+});
+function renderTable() {
+  let rows = DATA.rows.filter(r => filter === "All" || r.series === filter);
+  if (sortKey) rows = [...rows].sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
+  const maxPct = Math.max(...DATA.rows.map(r => r.neutralised_pct)) || 1;
+  $("tbl").innerHTML = `<thead><tr>${COLS.map(([k, l, n]) =>
+      `<th class="${n ? "num" : ""}" data-k="${k}">${l}${sortKey === k ? (sortDir > 0 ? " ↑" : " ↓") : ""}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr class="${isHL(r.series) ? "hl" : ""}">${COLS.map(([k, , n]) => {
+      if (k === "neutralised_pct") return `<td class="num"><span class="bar-cell" style="width:${Math.max(2, 60 * r[k] / maxPct)}px;background:${isHL(r.series) ? "var(--hl)" : "var(--other)"}"></span>${fmt(r[k])}%</td>`;
+      if (k === "red_flag_minutes") return `<td class="num">${r[k] ? fmt(r[k]) : "–"}</td>`;
+      return `<td class="${n ? "num" : ""}">${n ? Math.round(r[k]) : esc(r[k] || "–")}</td>`;
+    }).join("")}</tr>`).join("")}</tbody>`;
+  [...$("tbl").querySelectorAll("th")].forEach(th => th.onclick = () => {
+    const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : (k.includes("pct") || k.includes("laps") ? -1 : 1);
+    sortKey = k; renderTable(); });
+}
+renderTable();
+
+$("caveats").innerHTML = DATA.caveats.map(c => `<li>${esc(c)}</li>`).join("");
+$("built").textContent = `Built ${DATA.built} from out/comparison.csv · ${DATA.rows.length} races.`;
+</script>
+</body>
+</html>
