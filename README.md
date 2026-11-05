@@ -4,7 +4,9 @@ How much racing did each F4 series lose to Safety Car / Full Course Yellow / red
 Compares **F4 Saudi Arabia** with **F4 Middle East (ex-F4 UAE)**, **Italian F4** and **British F4**
 using the official lap-by-lap timing documents.
 
-Open **`out/dashboard.html`** in any browser to see the result.
+**[View the live dashboard →](https://ellyhaniz.github.io/f4-flag-tracker/)**
+
+Or open **`out/dashboard.html`** in any browser to see it offline.
 
 ## Run it
 
