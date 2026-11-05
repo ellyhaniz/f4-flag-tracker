@@ -18,14 +18,13 @@ NUMERIC = ["cars", "total_laps", "neutralised_laps", "green_laps", "neutralised_
 
 # Known data gaps, shown on the page so nobody over-reads the numbers.
 CAVEATS = [
-    "F4 Middle East Round 5 (Lusail, 3 races) is not published online, so 12 of 15 races are included.",
-    "Italian F4 Barcelona Race 2 has no published timing (Race 3 there was abandoned).",
-    "British F4 Zandvoort Rounds 17 and 18 were red-flagged; only the post-restart laps are published.",
-    "Red-flag minutes are only detected when the stoppage sits inside one timed lap (F4 Middle East). "
-    "Where timing restarts after a red flag (most British/Italian cases) the stopped time is not counted.",
-    "Laps are classified from lap times only and not yet cross-checked with race-control messages, "
-    "so a Safety Car can't be told apart from a Full Course Yellow, and a very short FCY that slows "
-    "the leaders by less than 25% would be missed.",
+    "A few races aren't included because their timing was never published: F4 Middle East's Lusail "
+    "round (3 races) and Italian F4's Barcelona Race 2. For British F4's two red-flagged Zandvoort races, "
+    "only the laps after the restart are available.",
+    "Red flags are probably undercounted. When the timing restarts after a stoppage, the time spent "
+    "stopped doesn't show up in the lap times.",
+    "Everything here comes from lap times. I haven't checked it against the official race control "
+    "messages yet, so I can't tell a safety car apart from a full course yellow.",
 ]
 
 # The page explains the rule using the same numbers the analysis used.
@@ -90,24 +89,25 @@ TEMPLATE = r"""<!doctype html>
   color-scheme: light;
   --surface-0: #f5f4f1; --surface-1: #fcfcfb; --border: #e3e2de; --grid: #ebeae6;
   --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #6f6e69;
-  --hl: #9e1b32; --hl-soft: #f5d6db; --other: #8a8984; --other-soft: #e3e2de;
-  --neut: #eda100; --neut-soft: #fde7b0; --red: #d03b3b; --red-soft: #f3c4c4;
+  --hl: #550000; --hl-soft: #ecd6d6; --other: #8a8984; --other-soft: #e3e2de;
+  --neut: #eda100; --neut-soft: #fde7b0; --red: #550000; --red-soft: #ecd6d6;
+  --good: #0ca30c;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --surface-0: #121211; --surface-1: #1a1a19; --border: #2e2e2c; --grid: #262624;
     --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #9a998f;
-    --hl: #e8333f; --hl-soft: #4d1219; --other: #75746f; --other-soft: #383835;
-    --neut: #fab219; --neut-soft: #5c4300; --red: #e66767; --red-soft: #4a1c1c;
+    --hl: #cc1f1f; --hl-soft: #3d1414; --other: #75746f; --other-soft: #383835;
+    --neut: #fab219; --neut-soft: #5c4300; --red: #cc1f1f; --red-soft: #3d1414;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --surface-0: #121211; --surface-1: #1a1a19; --border: #2e2e2c; --grid: #262624;
   --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #9a998f;
-  --hl: #e8333f; --hl-soft: #4d1219; --other: #75746f; --other-soft: #383835;
-    --neut: #fab219; --neut-soft: #5c4300; --red: #e66767; --red-soft: #4a1c1c;
+  --hl: #cc1f1f; --hl-soft: #3d1414; --other: #75746f; --other-soft: #383835;
+    --neut: #fab219; --neut-soft: #5c4300; --red: #cc1f1f; --red-soft: #3d1414;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--surface-0); color: var(--text-primary); border-top: 5px solid var(--hl);
@@ -157,7 +157,7 @@ ul.caveats li { margin-bottom: 6px; }
 .def p { margin: 0; color: var(--text-secondary); font-size: 14px; }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
 h3 { font-size: 15px; margin: 20px 0 8px; }
-.neut-word { color: var(--neut); }
+.neut-word { font-style: italic; }
 .rf-swatch { background: repeating-linear-gradient(135deg, var(--red) 0 2px, var(--red-soft) 2px 4px) !important; }
 /* collapsible explainer: the whole heading row is the click target, chevron rotates when open */
 details > summary { list-style: none; cursor: pointer; position: relative; padding-right: 36px; }
@@ -187,7 +187,7 @@ ol.steps b { color: var(--text-primary); }
 </head>
 <body>
 <main>
-  <h1>F4 Flag Tracker — 2025</h1>
+  <h1>F4 Flag Tracker 2025</h1>
   <p class="sub" id="lede"></p>
 
   <div class="tiles" id="tiles"></div>
@@ -195,23 +195,19 @@ ol.steps b { color: var(--text-primary); }
   <details class="card" id="explainer">
     <summary>
       <h2>What does “<span class="neut-word">Neutralised</span>” mean?</h2>
-      <span class="toggle-hint">Definitions, what counts as a yellow / red flag, and how laps are flagged</span>
+      <span class="toggle-hint">What counted and what didn't</span>
     </summary>
-    <p class="note" style="margin:12px 0 0">Everything on this page counts <b>race laps</b> only: no practice,
-      qualifying or formation laps.</p>
+    <p class="note" style="margin:12px 0 0">I only counted <b>race laps</b>, so no practice, qualifying or formation laps.</p>
     <div class="defs">
       <div class="def"><b><span class="swatch" style="background:var(--neut)"></span>Neutralised lap</b>
-        <p>A race lap where the <b>whole field</b> was slowed and no racing was possible: behind the
-        Safety Car, under a Full Course Yellow, or a lap interrupted by a red flag. These are the
-        “wasted” laps: they count towards race distance but nobody is racing.</p></div>
+        <p>A lap where the <b>whole field</b> had to slow down, so nobody was really racing. That means a
+        safety car, a full course yellow or a red flag. The lap still counts towards the race distance.</p></div>
       <div class="def"><b><span class="swatch" style="background:var(--other)"></span>Green lap</b>
-        <p>Every other race lap: the field is racing at full speed, even if there was a waved yellow
-        somewhere on the circuit.</p></div>
-      <div class="def"><b>Clean race</b>
-        <p>A race with <b>zero</b> neutralised laps from start to flag.</p></div>
+        <p>A normal racing lap. A waved yellow in one corner still counts as green.</p></div>
+      <div class="def"><b><span class="swatch" style="background:var(--good)"></span>Clean race</b>
+        <p>A race with no neutralised laps at all.</p></div>
       <div class="def"><b><span class="swatch rf-swatch"></span>Red-flag minutes</b>
-        <p>Time the race was stopped, when it shows up inside a timed lap. The lap itself is also
-        counted as neutralised.</p></div>
+        <p>How long a race was stopped for. I can only measure this when the stop happens inside a timed lap.</p></div>
     </div>
 
     <h3>What counts and what doesn't</h3>
@@ -219,40 +215,36 @@ ol.steps b { color: var(--text-primary); }
       <thead><tr><th>Situation</th><th>Neutralised?</th><th>Why</th></tr></thead>
       <tbody>
         <tr><td>Safety Car period</td><td><span class="yes">Yes</span></td>
-          <td>The whole field queues behind the Safety Car. These laps run roughly 40–100% slower than racing pace,
-            so they are always caught.</td></tr>
+          <td>Everyone is stuck behind the safety car, so these laps are a lot slower (around 40–100%). Easy to spot.</td></tr>
         <tr><td>Full Course Yellow (FCY) / Virtual Safety Car</td><td><span class="yes">Yes</span></td>
-          <td>A speed limit applies across the whole track, so every car slows. Counted when it slows the leaders by more
-            than <span class="thr-pct"></span> on that lap. A very short FCY that clips one lap only slightly can fall under that.</td></tr>
+          <td>There's a speed limit on the whole track. I count it when the leaders are more than
+            <span class="thr-pct"></span> slower that lap, so a really short one might slip through.</td></tr>
         <tr><td>Red flag (race stopped)</td><td><span class="yes">Yes</span></td>
-          <td>The lap the race is stopped on, plus any Safety Car laps after the restart. If the stoppage happens
-            inside a timed lap (lap more than <span class="rf-x"></span> normal pace), its length is also shown in red-flag minutes.</td></tr>
+          <td>The lap the race was stopped on, plus any safety car laps after the restart.</td></tr>
         <tr><td>Safety Car start (lap 1 behind the SC)</td><td><span class="yes">Yes</span></td>
-          <td>Same as any Safety Car lap.</td></tr>
+          <td>Same as any other safety car lap.</td></tr>
         <tr><td>Local / waved yellow at one marshal post</td><td><span class="no">No</span></td>
-          <td>No overtaking in one sector only. The rest of the lap is raced and the leaders lose a second or two,
-            far under the <span class="thr-pct"></span> threshold. This is <b>not</b> what the tracker is measuring.</td></tr>
+          <td>Only one corner is slowed, so the leaders lose a second or two. That's not what I'm measuring.</td></tr>
         <tr><td>Normal standing-start lap 1</td><td><span class="no">No</span></td>
-          <td>Lap 1 is a bit slower (about 5–15%) because cars start from rest, but it is raced.</td></tr>
+          <td>Lap 1 is always a bit slower because the cars start from a standstill, but it's still racing.</td></tr>
         <tr><td>One driver spins, crashes or pits</td><td><span class="no">No</span></td>
-          <td>Only the top 3 finishers' lap times are used and the middle one is taken, so one car's
-            problem can't flag a lap. It only counts if the incident brings out a Safety Car or FCY.</td></tr>
+          <td>I only look at the top 3 finishers and use the middle time, so one person's problem can't flag
+            a lap. It only counts if it brings out a safety car or yellow.</td></tr>
         <tr><td>Formation lap</td><td><span class="no">No</span></td>
-          <td>Not a race lap, so it is not in the timing data.</td></tr>
+          <td>Not a race lap, so it's not in the timing data.</td></tr>
       </tbody>
     </table></div>
 
-    <h3>How a lap gets flagged</h3>
+    <h3>How I flag a lap</h3>
     <ol class="steps">
-      <li><b>Lead pace:</b> for every lap, take the lap times of the top 3 finishers and use the middle one.</li>
-      <li><b>Normal pace:</b> the race's typical full-speed lap (the median of laps within 10% of the
-        quickest lead-pace lap).</li>
-      <li><b>Neutralised</b> if lead pace is more than <span class="thr-x"></span> normal pace
-        (<span class="thr-pct"></span> slower). <b>Red flag</b> if it is more than <span class="rf-x"></span> normal pace.</li>
+      <li>For each lap, I take the top 3 finishers' lap times and use the middle one.</li>
+      <li>I work out the race's normal pace from its quickest laps.</li>
+      <li>If a lap is more than <span class="thr-x"></span> normal pace (<span class="thr-pct"></span> slower),
+        it's <b>neutralised</b>. More than <span class="rf-x"></span> means a <b>red flag</b>.</li>
     </ol>
 
     <div class="ex-head">
-      <label for="ex-race" class="note" style="margin:0">See it on a real race:</label>
+      <label for="ex-race" class="note" style="margin:0">Pick a race to see it:</label>
       <select id="ex-race"></select>
     </div>
     <div class="legend">
@@ -267,19 +259,19 @@ ol.steps b { color: var(--text-primary); }
   <div class="grid2">
     <section class="card">
       <h2>Share of laps neutralised</h2>
-      <p class="note">Safety Car / Full Course Yellow laps ÷ all race laps, whole season.</p>
+      <p class="note">How many race laps were spent behind the safety car or under yellow, across the whole season.</p>
       <div id="bar-neut"></div>
     </section>
     <section class="card">
       <h2>Races with no neutralised laps</h2>
-      <p class="note">Percentage of each series' races that ran fully green.</p>
+      <p class="note">How many races ran green from start to finish.</p>
       <div id="bar-clean"></div>
     </section>
   </div>
 
   <section class="card">
-    <h2>Every race, one dot each</h2>
-    <p class="note">Neutralised share of each race. Hover a dot for the race. Dots at 0% ran fully green.</p>
+    <h2>Every race</h2>
+    <p class="note">Each dot is one race. Hover over a dot to see which race it was.</p>
     <div class="legend"><span><i style="background:var(--hl)"></i><span id="lg-hl"></span></span>
       <span><i style="background:var(--other)"></i>Other series</span></div>
     <div id="strip"></div>
@@ -288,14 +280,14 @@ ol.steps b { color: var(--text-primary); }
   <details class="card" id="race-table">
     <summary>
       <h2>Race by race</h2>
-      <span class="toggle-hint" id="race-hint">Every race in a table you can filter and sort</span>
+      <span class="toggle-hint" id="race-hint">Every race in one table</span>
     </summary>
     <div class="controls" id="filters" style="margin-top:14px"></div>
     <div class="table-wrap"><table id="tbl"></table></div>
   </details>
 
   <section class="card">
-    <h2>How to read this — and what's missing</h2>
+    <h2>What's missing</h2>
     <ul class="caveats" id="caveats"></ul>
     <p class="note" id="built" style="margin:12px 0 0"></p>
   </section>
@@ -328,9 +320,10 @@ const hl = sum.find(s => isHL(s.series));
 const others = sum.filter(s => !isHL(s.series));
 if (hl && others.length) {
   const avg = others.reduce((a, s) => a + s.neutralised, 0) / others.reduce((a, s) => a + s.laps, 0) * 100;
-  $("lede").textContent = `${HL} lost ${fmt(hl.neutralised_pct)}% of its race laps to Safety Car or Full Course `
-    + `Yellow periods, against ${fmt(avg)}% across ${others.map(s => s.series).join(", ")} combined `
-    + `— about ${fmt(avg / hl.neutralised_pct, 1)}× less neutralised running.`;
+  $("lede").textContent = `A data project I built to practise working with real motorsport timing. `
+    + `I pulled the official lap-by-lap results for four F4 series from 2025 and counted how many race laps `
+    + `were spent behind a safety car or under yellow. ${HL} came out cleanest: only ${fmt(hl.neutralised_pct)}% `
+    + `of its laps were neutralised, compared with ${fmt(avg)}% for the other three combined.`;
 }
 $("lg-hl").textContent = HL;
 
@@ -345,7 +338,8 @@ $("tiles").innerHTML = order.map(s => `
   </div>`).join("");
 
 // ---------- horizontal bar chart ----------
-function hbar(target, items, valueKey, labelFn, tipFn) {
+// hlColour: colour for the highlighted series' bar (defaults to the page highlight)
+function hbar(target, items, valueKey, labelFn, tipFn, hlColour = "var(--hl)") {
   const W = 480, rowH = 40, left = 130, right = 56, H = items.length * rowH + 8;
   const max = Math.max(...items.map(d => d[valueKey])) * 1.05 || 1;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
@@ -358,7 +352,7 @@ function hbar(target, items, valueKey, labelFn, tipFn) {
     const w = Math.max(2, x(d[valueKey]) - left);
     // bar anchored at the baseline: square at the axis, 4px rounded at the data end
     el("path", { d: `M${left},${y} h${w - 4} a4,4 0 0 1 4,4 v${bh - 8} a4,4 0 0 1 -4,4 h${-(w - 4)} z`,
-      fill: isHL(d.series) ? "var(--hl)" : "var(--other)" }, svg);
+      fill: isHL(d.series) ? hlColour : "var(--other)" }, svg);
     el("text", { x: left + w + 8, y: y + bh / 2 + 4, class: "lbl" }, svg).textContent = labelFn(d);
     const hit = el("rect", { x: 0, y: y - 8, width: W, height: rowH, fill: "transparent" }, svg);
     hit.addEventListener("mousemove", ev => showTip(tipFn(d), ev));
@@ -370,7 +364,7 @@ function hbar(target, items, valueKey, labelFn, tipFn) {
 hbar("bar-neut", order, "neutralised_pct", d => fmt(d.neutralised_pct) + "%",
   d => `<b>${esc(d.series)}</b>${d.neutralised} of ${d.laps} laps neutralised<br>Worst race: ${esc(d.worst.event)} ${esc(d.worst.race)} (${fmt(d.worst.neutralised_pct)}%)`);
 hbar("bar-clean", [...sum].sort((a, b) => b.clean_pct - a.clean_pct), "clean_pct", d => d.clean_pct + "%",
-  d => `<b>${esc(d.series)}</b>${d.clean_races} of ${d.races} races fully green`);
+  d => `<b>${esc(d.series)}</b>${d.clean_races} of ${d.races} races fully green`, "var(--good)");
 
 // ---------- strip plot: one dot per race ----------
 (function strip() {
@@ -445,7 +439,7 @@ function renderTable() {
     sortKey = k; renderTable(); });
 }
 renderTable();
-$("race-hint").textContent = `All ${DATA.rows.length} races in a table you can filter by series and sort by any column`;
+$("race-hint").textContent = `All ${DATA.rows.length} races. Filter by series or click a column to sort.`;
 
 // ---------- explainer: thresholds + example race chart ----------
 const T = DATA.threshold, RF = DATA.red_flag_factor;
@@ -519,11 +513,11 @@ document.querySelectorAll(".rf-x").forEach(e => e.textContent = RF + "×");
       el("text", { x: W - right + 10, y: y(v) + 4, style: "fill:var(--text-primary);font-size:11.5px" }, svg).textContent = label;
     });
     box.appendChild(svg);
-    $("ex-summary").textContent = `${r.series} · ${r.event} · ${r.race}: normal pace ${fmtLap(base)}. `
-      + (r.neutralised_laps ? `Laps ${prettyLaps(r.neutralised_lap_numbers)} were over the ${T}× line, so ${r.neutralised_laps} of ${r.total_laps} laps count as neutralised.`
-                            : `No lap crossed the ${T}× line: a clean race.`)
-      + (r.red_flag_minutes ? ` That includes a red-flag stoppage of about ${fmt(r.red_flag_minutes, 0)} minutes.` : "")
-      + (Math.max(...pace) > yMax ? " ↑ = lap goes off the top of the chart." : "");
+    $("ex-summary").textContent = `${r.series}, ${r.event}, ${r.race}. Normal pace was ${fmtLap(base)}. `
+      + (r.neutralised_laps ? `Laps ${prettyLaps(r.neutralised_lap_numbers)} went over the ${T}× line, so ${r.neutralised_laps} of ${r.total_laps} laps count as neutralised.`
+                            : `No lap went over the ${T}× line, so this was a clean race.`)
+      + (r.red_flag_minutes ? ` The race was also stopped for about ${fmt(r.red_flag_minutes, 0)} minutes.` : "")
+      + (Math.max(...pace) > yMax ? " ↑ means the lap goes off the top of the chart." : "");
   }
 })();
 function prettyLaps(s) { return String(s).split(";").join(", ").replace(/-/g, "–"); }
